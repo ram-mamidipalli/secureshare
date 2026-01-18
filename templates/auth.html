@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secureshare | Secure File Transfer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+
+    <nav class="navbar">
+        <div class="nav-brand">
+
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Secureshare
+        </div>
+        <div class="nav-links">
+            <a href="#">Receive</a>
+            <a href="{{ url_for('auth', mode='login') }}">Sign in</a>
+            <a href="{{ url_for('auth', mode='register') }}" class="btn-nav-primary">Sign up</a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+
+
+        <div class="auth-left">
+            <h1 style="margin-bottom: 1rem;">Secure file sharing<br>made simple.</h1>
+            <p style="max-width: 400px; margin-bottom: 0;">
+                Secureshare uses AES & RSA encryption to ensure your data travels safely.
+            </p>
+        </div>
+
+
+        <div class="auth-right" id="form-anchor">
+            <div class="form-wrapper">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+
+                {% if mode == 'register' %}
+                <h2>Create an account</h2>
+                <p style="margin-bottom: 2rem; font-size: 0.95rem;">Join us to start sharing securely.</p>
+                {% else %}
+                <h2>Sign in</h2>
+                <p style="margin-bottom: 2rem; font-size: 0.95rem;">or <a
+                        href="{{ url_for('auth', mode='register') }}">create an account</a></p>
+                {% endif %}
+
+                <form method="POST">
+                    <input type="hidden" name="action" value="{{ 'register' if mode == 'register' else 'login' }}">
+
+                    {% if mode == 'register' %}
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" required placeholder="Enter your email">
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" required
+                            placeholder="{{ 'Choose a username' if mode == 'register' else 'Enter your username' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required placeholder="Enter your password">
+                    </div>
+
+                    <button type="submit" class="btn">
+                        {{ 'Sign up' if mode == 'register' else 'Sign in' }}
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+                    Sign in for sending and receiving files
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

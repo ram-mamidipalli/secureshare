@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | SecureShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">SecureShare</div>
+        <div class="nav-links">
+            <span>Hello, {{ username }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Sign out</a>
+        </div>
+    </nav>
+
+    <div class="container" style="text-align: center; margin-top: 5rem;">
+
+        <h1 style="margin-bottom: 2rem;">Choose Encryption Algorithm</h1>
+
+        <div class="grid-cards" style="max-width: 800px; margin: 0 auto;">
+
+            <a href="{{ url_for('aes_options') }}" class="card">
+                <div class="card-icon">🔐</div>
+                <h2>AES Algorithm</h2>
+                <p>Password-based symmetric encryption. Best for sharing with a shared secret.</p>
+            </a>
+
+            <a href="{{ url_for('rsa_options') }}" class="card">
+                <div class="badge badge-recommended">Recommended</div>
+                <div class="card-icon">🔑</div>
+                <h2>RSA Algorithm</h2>
+                <p>Public-key asymmetric encryption. Best for secure key exchange.</p>
+            </a>
+
+        </div>
+
+        <div style="max-width: 800px; margin: 4rem auto 2rem; text-align: left;">
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">AES Algorithm:</h3>
+                <p style="margin-bottom: 0;">Used for fast and efficient encryption of large amounts of data such as
+                    files, images, videos, and databases.</p>
+            </div>
+            <div>
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">RSA Algorithm:</h3>
+                <p style="margin-bottom: 0;">Used for secure key exchange, digital signatures, and authentication over
+                    insecure networks.</p>
+            </div>
+        </div>
+
+        <!-- File Management Section -->
+        <div style="max-width: 1000px; margin: 4rem auto;">
+            <h2 style="text-align: left; margin-bottom: 1.5rem;">My Files</h2>
+            <div class="file-list">
+                {% if files %}
+                <div class="file-list">
+                    <!-- Header Row -->
+                    <div class="file-item file-header"
+                        style="background: transparent; border: none; font-weight: bold; color: var(--text-muted);">
+                        <div class="file-info">File Name</div>
+                        <div class="file-meta">Algorithm</div>
+                        <div class="file-actions">Actions</div>
+                    </div>
+
+                    {% for file in files %}
+                    <div class="file-item">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <div>
+                                <div class="file-name">{{ file.original_filename }}</div>
+                                <div class="file-meta">Share ID: {{ file.share_id }}</div>
+                            </div>
+                        </div>
+                        <div class="file-meta">
+                            {% if file.algorithm == 'RSA' %}
+                            <span class="badge"
+                                style="background: #e9d8fd; color: #553c9a; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">RSA</span>
+                            {% else %}
+                            <span class="badge"
+                                style="background: #bee3f8; color: #2c5282; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">AES</span>
+                            {% endif %}
+                        </div>
+                        <div class="file-actions">
+                            <!-- View Button -->
+                            <button onclick="openViewModal('{{ file.share_id }}', '{{ file.algorithm }}')"
+                                class="btn-icon" title="View Decrypted">
+                                View
+                            </button>
+
+                            <button onclick="openReencryptModal('{{ file.share_id }}', '{{ file.algorithm }}')"
+                                class="btn-icon" title="Re-Encrypt">🔄 Re-Encrypt</button>
+                            <form action="{{ url_for('delete_file_route', share_id=file.share_id) }}" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this file? This action cannot be undone.');"
+                                style="display:inline;">
+                                <button type="submit" class="btn-icon" title="Delete"
+                                    style="color: #c53030; border-color: #fed7d7;">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="text-align: left; color: var(--text-muted);">No files uploaded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Re-Encrypt Modal -->
+    <div id="reencrypt-modal" class="modal-overlay">
+        <div class="modal">
+            <h3>Re-Encrypt File</h3>
+            <p id="modal-desc">Enter the old password to decrypt and a new password to re-encrypt this file.</p>
+
+            <form id="reencrypt-form" action="" method="POST" enctype="multipart/form-data">
+
+                <!-- AES Inputs (Password) -->
+                <div id="aes-inputs">
+                    <div class="form-group" style="text-align: left;">
+                        <label>Old Password</label>
+                        <input type="password" name="old_password" id="old_password"
+                            placeholder="Enter current password">
+                    </div>
+                    <div class="form-group" style="text-align: left;">
+                        <label>New Password</label>
+                        <input type="password" name="new_password" id="new_password" placeholder="Enter new password">
+                    </div>
+                </div>
+
+                <!-- RSA Inputs (Files) -->
+                <div id="rsa-inputs" style="display: none;">
+                    <div class="form-group" style="text-align: left;">
+                        <label>Old Private Key (PEM File)</label>
+                        <input type="file" name="old_private_key" id="old_private_key">
+                    </div>
+                    <div class="alert alert-info"
+                        style="font-size: 0.9em; margin-top: 10px; background-color: #ebf8ff; color: #2c5282; padding: 10px; border-radius: 4px;">
+                        The server will verify your old key, generate a NEW Key Pair, re-encrypt the file, and download
+                        the new keys automatically.
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button type="button" onclick="closeReencryptModal()" class="btn"
+                        style="background-color: #f0f0f0; color: #333;">Cancel</button>
+                    <button type="submit" class="btn">Re-Encrypt Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View File Modal -->
+    <div id="view-modal" class="modal-overlay">
+        <div class="modal">
+            <h3>View Decrypted File</h3>
+            <p id="view-modal-desc">Enter your credentials to decrypt and view this file.</p>
+
+            <form id="view-form" action="" method="POST" target="_blank" enctype="multipart/form-data">
+
+                <!-- AES Inputs (Password) -->
+                <div id="view-aes-inputs">
+                    <div class="form-group" style="text-align: left;">
+                        <label>Password</label>
+                        <input type="password" name="password" id="view_password"
+                            placeholder="Enter password to decrypt">
+                    </div>
+                </div>
+
+                <!-- RSA Inputs (File) -->
+                <div id="view-rsa-inputs" style="display: none;">
+                    <div class="form-group" style="text-align: left;">
+                        <label>Private Key (PEM File)</label>
+                        <input type="file" name="private_key" id="view_private_key">
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button type="button" onclick="closeViewModal()" class="btn"
+                        style="background-color: #f0f0f0; color: #333;">Cancel</button>
+                    <button type="submit" class="btn">Decrypt & View</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Flash Messages (add this if not present globally) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 2000;">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <script>
+        function openReencryptModal(shareId, algorithm) {
+            const modal = document.getElementById('reencrypt-modal');
+            const form = document.getElementById('reencrypt-form');
+            const aesInputs = document.getElementById('aes-inputs');
+            const rsaInputs = document.getElementById('rsa-inputs');
+            const modalDesc = document.getElementById('modal-desc');
+
+            form.action = '/reencrypt/' + shareId;
+            modal.classList.add('active');
+
+            // Detect RSA file by Algorithm Flag
+            if (algorithm === 'RSA') {
+                // RSA Mode
+                aesInputs.style.display = 'none';
+                rsaInputs.style.display = 'block';
+                modalDesc.textContent = "Upload your Old Private Key to decrypt. A new Key Pair will be generated and downloaded automatically.";
+
+                // Clear required from AES
+                document.getElementById('old_password').removeAttribute('required');
+                document.getElementById('new_password').removeAttribute('required');
+
+                // Add required to RSA
+                document.getElementById('old_private_key').setAttribute('required', 'required');
+
+            } else {
+                // AES Mode
+                aesInputs.style.display = 'block';
+                rsaInputs.style.display = 'none';
+                modalDesc.textContent = "Enter the old password to decrypt and a new password to re-encrypt this file.";
+
+                // Add required to AES
+                document.getElementById('old_password').setAttribute('required', 'required');
+                document.getElementById('new_password').setAttribute('required', 'required');
+
+                // Clear required from RSA
+                document.getElementById('old_private_key').removeAttribute('required');
+            }
+        }
+
+        function closeReencryptModal() {
+            document.getElementById('reencrypt-modal').classList.remove('active');
+        }
+
+        // View Modal Logic
+        function openViewModal(shareId, algorithm) {
+            const modal = document.getElementById('view-modal');
+            const form = document.getElementById('view-form');
+            const aesInputs = document.getElementById('view-aes-inputs');
+            const rsaInputs = document.getElementById('view-rsa-inputs');
+
+            form.action = '/view_file/' + shareId;
+            modal.classList.add('active');
+
+            if (algorithm === 'RSA') {
+                // RSA
+                aesInputs.style.display = 'none';
+                rsaInputs.style.display = 'block';
+
+                document.getElementById('view_password').removeAttribute('required');
+                document.getElementById('view_private_key').setAttribute('required', 'required');
+            } else {
+                // AES
+                aesInputs.style.display = 'block';
+                rsaInputs.style.display = 'none';
+
+                document.getElementById('view_password').setAttribute('required', 'required');
+                document.getElementById('view_private_key').removeAttribute('required');
+            }
+        }
+
+        function closeViewModal() {
+            document.getElementById('view-modal').classList.remove('active');
+        }
+
+        window.onclick = function (event) {
+            const reModal = document.getElementById('reencrypt-modal');
+            const viewModal = document.getElementById('view-modal');
+            if (event.target == reModal) {
+                closeReencryptModal();
+            }
+            if (event.target == viewModal) {
+                closeViewModal();
+            }
+        }
+    </script>
+
+    <footer class="main-footer">Made by secureshare 2026</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RSA Decrypt | SecureShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">SecureShare</div>
+        <div class="nav-links">
+            <a href="{{ url_for('rsa_options') }}" class="btn btn-secondary">Back</a>
+        </div>
+    </nav>
+
+    <div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+
+        <div class="auth-card" style="max-width: 600px;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2>RSA Decryption</h2>
+                <p>Upload the encrypted file and your Private Key (.pem).</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label>Enter Share ID (to download & decrypt)</label>
+                    <input type="password" name="share_id" placeholder="e.g. X9Y8Z7">
+                </div>
+
+                <div style="text-align: center; margin: 1rem 0; color: #888;">OR</div>
+
+                <div class="form-group">
+                    <label>Encrypted File</label>
+                    <input type="file" name="file">
+                </div>
+
+                <div class="form-group">
+                    <label>Private Key File (.pem)</label>
+                    <input type="file" name="private_key" required accept=".pem">
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%;">Decrypt & Download</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

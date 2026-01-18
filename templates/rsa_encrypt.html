@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RSA Encrypt | SecureShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">SecureShare</div>
+        <div class="nav-links">
+            <a href="{{ url_for('rsa_options') }}" class="btn btn-secondary">Back</a>
+        </div>
+    </nav>
+
+    <div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+
+        <div class="auth-card" style="max-width: 600px;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2>RSA Encryption</h2>
+                <p>Upload the file to encrypt and the Public Key (.pem) to use.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label>File to Encrypt</label>
+                    <input type="file" name="file" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Public Key File (.pem)</label>
+                    <input type="file" name="public_key" required accept=".pem">
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%;">Encrypt & Download</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

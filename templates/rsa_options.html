@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RSA Options | SecureShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">SecureShare</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container" style="text-align: center; margin-top: 5rem;">
+
+        <h1 style="margin-bottom: 2rem;">RSA Operations</h1>
+        <p style="margin-bottom: 3rem;">Asymmetric encryption using Public/Private Key Pairs.</p>
+
+        <!-- Use a wider max-width to allow 3 cards side-by-side -->
+        <div class="grid-cards"
+            style="max-width: 1200px; margin: 0 auto; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
+            <!-- Trigger Modal instead of direct link -->
+            <a href="#" onclick="openModal(); return false;" class="card">
+                <div class="card-icon">🔑</div>
+                <h2>Generate Keys</h2>
+                <p>Create a new Public/Private Key Pair.</p>
+            </a>
+
+            <a href="{{ url_for('rsa_encrypt_view') }}" class="card">
+                <div class="card-icon">🔒</div>
+                <h2>Encrypt File</h2>
+                <p>Encrypt a file using a recipient's Public Key.</p>
+            </a>
+
+            <a href="{{ url_for('rsa_decrypt_view') }}" class="card">
+                <div class="card-icon">🔓</div>
+                <h2>Decrypt File</h2>
+                <p>Decrypt a file using your Private Key.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="key-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="card-icon">🔑</div>
+            <h3>Generate RSA Keys</h3>
+            <p>Download and save the public key and private key. You will need them for encryption and decryption.</p>
+
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn"
+                    style="background-color: #f0f0f0; color: #333;">Cancel</button>
+                <a href="{{ url_for('rsa_generate') }}" class="btn" onclick="closeModal()">Download Keys</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('key-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('key-modal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('key-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

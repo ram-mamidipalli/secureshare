@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AES Options | SecureShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">SecureShare</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container" style="text-align: center; margin-top: 5rem;">
+
+        <h1 style="margin-bottom: 2rem;">AES Operations</h1>
+
+        {% if share_id %}
+        <div class="alert alert-success" style="max-width: 600px; margin: 0 auto 2rem auto;">
+            <h3>File Encrypted!</h3>
+            <p>Your Share ID is: <strong style="font-size: 1.5rem; display: block; margin: 0.5rem 0;">{{ share_id
+                    }}</strong></p>
+            <p>Share this ID securely.</p>
+            <a href="{{ url_for('download_encrypted', share_id=share_id) }}" class="btn"
+                style="background: white; color: var(--primary-color); border: 1px solid var(--primary-color); margin-top: 1rem;">Download
+                Encrypted File</a>
+        </div>
+        {% else %}
+        <p style="margin-bottom: 3rem;">Advanced Encryption Standard using a shared password.</p>
+        {% endif %}
+
+        <div class="grid-cards" style="max-width: 800px; margin: 0 auto;">
+
+            <a href="{{ url_for('aes_encrypt') }}" class="card">
+                <div class="card-icon">🔒</div>
+                <h2>Encrypt File</h2>
+                <p>Upload a file and set a password.</p>
+            </a>
+
+            <a href="{{ url_for('aes_decrypt') }}" class="card">
+                <div class="card-icon">🔓</div>
+                <h2>Decrypt File</h2>
+                <p>Upload an encrypted file and enter password.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
